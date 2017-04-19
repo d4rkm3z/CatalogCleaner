@@ -1,0 +1,17 @@
+{
+  "name": "sadovnikov/catalog-clean-up",
+  "description": "Clean up big xml file products.xml",
+  "type": "project",
+  "authors": [
+    {
+      "name": "Kirill Sadovnikov",
+      "email": "d4rkm3z@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "": "Classes/"
+    }
+  },
+  "require": {}
+}
