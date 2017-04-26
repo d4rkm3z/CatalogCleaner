@@ -49,42 +49,7 @@ class ProductsXMLParser extends AbstractParser
 
                 $this->parseNode(static::_xmlToArray($xml->readInnerXML()));
                 $xml->next();
-
-//                $node = static::_xmlToArray($xml->readInnerXML(), $variantsAttributes);
-//                $this->setActiveModel("variants");
-//                $this->parsingNode($node);
             }
-
-
-
-            /*if ($isVariantStart) {
-                $variant = static::_xmlToArray($xml->readInnerXML(), $variantsAttributes);
-                $variantKey = isset($variant['variant_key']) ? $variant['variant_key'] : false;
-                if ($variantKey) {
-                    $variant['key'] = $variantKey;
-                    unset($variant['variant_key']);
-                } else {
-                    continue;
-                }
-
-                $productKey = isset($variant['product_key']) ? $variant['product_key'] : false;
-                if ($productKey) {
-                    unset($variant['product_key']);
-
-                    if (!isset($variants[$productKey])) {
-                        //$variants[$productKey] = [];
-                        $products[$productKey]['variants'] = [];
-                    }
-                    $variants[$productKey][$variantKey] = $variant;
-                    $products[$productKey]['variants'][$variantKey] = $variant;
-                }
-                unset($variant, $variantKey, $productKey);
-                $xml->next();
-            }
-
-            if (count($products) > 11000){
-                printf(count($products) . "\n");
-            }*/
         }
 
         $xml->close();

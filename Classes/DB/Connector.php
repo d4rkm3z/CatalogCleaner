@@ -65,11 +65,6 @@ class Connector
         $this->table = $table;
     }
 
-    public function fetchAll($rows = [])
-    {
-        return $this->querySelect($rows)->fetchAll(PDO::FETCH_ASSOC);
-    }
-
     public function query($queryString)
     {
         return $this->dbh->query($queryString);

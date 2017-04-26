@@ -1,6 +1,6 @@
 <?php
 use Parsers\XML\ProductsXMLParser;
-use Reformers\ProductReformer;
+use Writers\XMLConstruct;
 
 class Main
 {
@@ -11,17 +11,17 @@ class Main
 
     function __construct()
     {
-        $this->setParser(new ProductsXMLParser());
-    }
-
-    protected function setParser($parser)
-    {
-        $this->parser = $parser;
+        $this->parser = new ProductsXMLParser();
+        $this->writer = new XMLConstruct();
     }
 
     protected function parseXMLFile(){
         $this->parser->initReader($this->pathToXML);
         $this->parser->parseXML();
+    }
+
+    protected function writeXML(){
+        $this->writer->write();
     }
 
     /**
@@ -34,7 +34,9 @@ class Main
 
     public function main()
     {
-        $this->setPathToXML('Data/products.xml');
-        $this->parseXMLFile();
+//        $this->setPathToXML('Data/products.xml');
+//        $this->parseXMLFile();
+
+        $this->writeXML();
     }
 }
