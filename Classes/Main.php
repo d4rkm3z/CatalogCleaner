@@ -1,42 +1,25 @@
 <?php
-use Parsers\XML\ProductsXMLParser;
-use Writers\XMLConstruct;
+use Readers\ProductsXMLReader;
+use Writers\XMLWriter;
 
 class Main
 {
-    protected $pathToXML;
-    protected $parsedData;
-    protected $parser;
-    protected $reformer;
+    const PARSE = 1;
+    const WRITE = 2;
+
+    protected $parsedData, $option, $parser, $writer;
 
     function __construct()
     {
-        $this->parser = new ProductsXMLParser();
-        $this->writer = new XMLConstruct();
-    }
+        $sourceXmlPath = 'Data/products.xml';
+        $resultXmlPath = 'Results/products.xml';
 
-    protected function parseXMLFile(){
-        $this->parser->initReader($this->pathToXML);
-        $this->parser->parseXML();
-    }
-
-    protected function writeXML(){
-        $this->writer->write();
-    }
-
-    /**
-     * @param mixed $pathToXML
-     */
-    public function setPathToXML($pathToXML)
-    {
-        $this->pathToXML = $pathToXML;
+        $writer = new XMLWriter($resultXmlPath);
+        $this->parser = new ProductsXMLReader($sourceXmlPath, $writer);
     }
 
     public function main()
     {
-//        $this->setPathToXML('Data/products.xml');
-//        $this->parseXMLFile();
-
-        $this->writeXML();
+        $this->parser->parseXML();
     }
 }
