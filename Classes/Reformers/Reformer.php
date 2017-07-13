@@ -57,7 +57,7 @@ class Reformer
         $this->setCounter();
         $this->filter();
         $this->rename();
-        $this->insertNewAttribute();
+        $this->insertNewAttributes();
         $this->sort();
         return $this->rawData;
     }
@@ -77,12 +77,14 @@ class Reformer
         }
     }
 
-    protected function insertNewAttribute(){
+    protected function insertNewAttributes(){
         if ($this->counter%5 == 0 && $this->validateProduct() && $this->rawData['show'] == 'true'){
             $this->rawData['is_new'] = 'true';
         }
 
-        $this->rawData['locale'] = 'en_EU';
+        if ($this->validateProduct()) {
+            $this->rawData['locale'] = 'en_US';
+        }
     }
 
     /**
