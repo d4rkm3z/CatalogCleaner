@@ -13,5 +13,9 @@
       "": "Classes/"
     }
   },
-  "require": {}
+  "minimum-stability": "dev",
+  "require": {
+    "d4rkm3z/bash-color-cli": "dev-master",
+    "paquettg/php-html-parser": "dev-master"
+  }
 }

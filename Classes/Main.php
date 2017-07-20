@@ -1,25 +1,17 @@
 <?php
-use Readers\ProductsXMLReader;
-use Writers\XMLWriter;
 
 class Main
 {
-    const PARSE = 1;
-    const WRITE = 2;
-
-    protected $parsedData, $option, $parser, $writer;
+    public $modelAction;
 
     function __construct()
     {
-        $sourceXmlPath = 'Data/products.xml';
-        $resultXmlPath = 'Results/products.xml';
-
-        $writer = new XMLWriter($resultXmlPath);
-        $this->parser = new ProductsXMLReader($sourceXmlPath, $writer);
+        $this->modelAction = Factory::getClass($_GET['action']);
     }
 
     public function main()
     {
-        $this->parser->parseXML();
+        print("Main.php: System is started<br>");
+        $this->modelAction->run();
     }
 }

@@ -4,14 +4,14 @@ namespace Writers;
 
 use Logs\Logs;
 
-class XMLWriter
+class XMLWriter extends XMLBase
 {
     protected $filePath;
     protected $xmlWriter;
 
-    public function __construct()
+    public function __construct($resultFilePath)
     {
-        $this->filePath = 'Results/products.xml';
+        $this->filePath = $resultFilePath;
         $this->validateResultFile();
         $this->initWriter();
 
@@ -25,6 +25,7 @@ class XMLWriter
 
     public function insertNode($cell, $nodeName)
     {
+
         if (count($cell) == 0) return;
         $this->xmlWriter->startElement($nodeName);
         $this->xmlWriter->startElement();
@@ -41,12 +42,6 @@ class XMLWriter
         $this->xmlWriter->openMemory();
         $this->xmlWriter->setIndent(true);
         $this->xmlWriter->startDocument('1.0', 'UTF-8');
-    }
-
-    protected function validateResultFile()
-    {
-        if (file_exists($this->filePath))
-            unlink($this->filePath);
     }
 
     protected function xmlHeader()
