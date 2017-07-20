@@ -3,20 +3,36 @@
 namespace Readers;
 
 use Logs\Logs;
+use Models\Colors;
 use Reformers\Reformer;
+use Traits\LoaderConfiguration;
 use Writers\XMLWriter;
 
 class ProductsXMLReader
 {
-    protected $reformer, $xml, $writer;
+    use LoaderConfiguration;
 
-    function __construct($sourceXmlPath, XMLWriter $writer)
+    const NOTHING = 0;
+    const PRODUCT = 1;
+    const VARIANT = 2;
+
+    protected $configFile = 'reformer.cleaner';
+    protected $reformer, $xml, $writer, $colorsModel, $config;
+
+    function __construct()
     {
-        $this->xml = new \XMLReader();
-        $this->writer = $writer;
-        $this->reformer = new Reformer();
+        $this->config = $this->loadConfig($this->configFile);
 
-        $this->xml->open($sourceXmlPath);
+        $this->xml = new \XMLReader();
+        $this->reformer = new Reformer();
+        $this->colorsModel = new Colors();
+        $this->writer = new XMLWriter($this->config["path"]["result"]);
+        $this->xml->open($this->config["path"]["source"]);
+    }
+
+    public function run()
+    {
+        self::parseXML();
     }
 
     /**
@@ -25,7 +41,7 @@ class ProductsXMLReader
      * @param $pathToXML
      * @return array
      */
-    public function parseXML()
+    protected function parseXML()
     {
         $xml = $this->xml;
         $parseVariants = true;
@@ -36,9 +52,15 @@ class ProductsXMLReader
             $isProductStart = $xml->nodeType == \XMLReader::ELEMENT && $nodeName == 'product';
             $isVariantStart = $parseVariants && !$isProductStart && $xml->nodeType == \XMLReader::ELEMENT && $nodeName == 'variant';
 
+            if ($isProductStart) $type = self::PRODUCT;
+            if ($isVariantStart) $type = self::VARIANT;
+
             if ($isProductStart || $isVariantStart) {
                 $node = static::_xmlToArray($xml->readInnerXML());
+                if (count($node) == 0) continue;
+
                 $node = $this->reformer->reformat($node);
+                self::beforeInsert($node, $type);
                 $this->writer->insertNode($node, $nodeName);
                 $xml->next();
             }
@@ -72,5 +94,15 @@ class ProductsXMLReader
         }
 
         return $result;
+    }
+
+    protected function beforeInsert(&$node, $type = self::NOTHING)
+    {
+        if ($type == self::PRODUCT) {
+            $this->colorsModel->insert($node);
+        } elseif ($type == self::VARIANT) {
+            $result = $this->colorsModel->getColors($node);
+            $node = array_merge($node, $result);
+        }
     }
 }

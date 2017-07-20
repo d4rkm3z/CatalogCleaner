@@ -1,0 +1,3 @@
+path:
+  source: 'Data/products.xml'
+  result: 'Results/products.xml'

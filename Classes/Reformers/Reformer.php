@@ -11,46 +11,6 @@ class Reformer
     protected $dataMap;
     protected $counter;
 
-    protected function fillItem(&$value, $key)
-    {
-        try {
-            $type = gettype($value);
-
-            if ($type == 'string') {
-                $caseName = trim($value) !== '*' ? $value : $key;
-                $value = isset($this->rawData[$caseName]) ? trim($this->rawData[$caseName]) : '';
-            } elseif ($type == 'array') {
-                $value = $this->getArrayValue($value);
-            }
-
-            return $value;
-        } catch (\Exception $e) {
-            Logs::write($e->getMessage());
-            exit();
-        }
-    }
-
-    protected function getArrayValue($array)
-    {
-        $result = 'false';
-        foreach ($array as $value) {
-            if (isset($this->rawData[$value])) {
-                $result = $this->rawData[$value];
-                break;
-            }
-        }
-        return $result;
-    }
-
-    protected function fillRawData()
-    {
-        foreach ($this->dataMap as &$case) {
-            foreach ($case as $key => &$value) {
-                $value = $this->fillItem($value, $key);
-            }
-        }
-    }
-
     public function reformat($rawData)
     {
         $this->rawData = $rawData;
@@ -62,29 +22,16 @@ class Reformer
         return $this->rawData;
     }
 
-    protected function sort()
+    protected function setCounter()
     {
-        ksort($this->rawData);
-    }
-
-    protected function validateProduct(){
-        return $this->rawData['_type'] == 'product';
-    }
-
-    protected function setCounter(){
         if ($this->validateProduct()) {
             $this->counter = $this->counter + 1;
         }
     }
 
-    protected function insertNewAttributes(){
-        if ($this->counter%5 == 0 && $this->validateProduct() && $this->rawData['show'] == 'true'){
-            $this->rawData['is_new'] = 'true';
-        }
-
-        if ($this->validateProduct()) {
-            $this->rawData['locale'] = 'en_US';
-        }
+    protected function validateProduct()
+    {
+        return $this->rawData['_type'] == 'product';
     }
 
     /**
@@ -119,7 +66,7 @@ class Reformer
                 preg_match('/(^[\w].+[^\_\d])/', $key, $matches);
                 $attr_name = $matches[0];
 
-                if (isset($props[$attr_name])){
+                if (isset($props[$attr_name])) {
                     return (in_array($key, $props[$attr_name]));
                 }
             }
@@ -154,5 +101,61 @@ class Reformer
                 unset($this->rawData[$key]);
             }
         });
+    }
+
+    protected function insertNewAttributes()
+    {
+        if ($this->counter % 5 == 0 && $this->validateProduct() && $this->rawData['show'] == 'true') {
+            $this->rawData['is_new'] = 'true';
+        }
+
+        if ($this->validateProduct()) {
+            $this->rawData['locale'] = 'en_US';
+        }
+    }
+
+    protected function sort()
+    {
+        ksort($this->rawData);
+    }
+
+    protected function fillRawData()
+    {
+        foreach ($this->dataMap as &$case) {
+            foreach ($case as $key => &$value) {
+                $value = $this->fillItem($value, $key);
+            }
+        }
+    }
+
+    protected function fillItem(&$value, $key)
+    {
+        try {
+            $type = gettype($value);
+
+            if ($type == 'string') {
+                $caseName = trim($value) !== '*' ? $value : $key;
+                $value = isset($this->rawData[$caseName]) ? trim($this->rawData[$caseName]) : '';
+            } elseif ($type == 'array') {
+                $value = $this->getArrayValue($value);
+            }
+
+            return $value;
+        } catch (\Exception $e) {
+            Logs::write($e->getMessage());
+            exit();
+        }
+    }
+
+    protected function getArrayValue($array)
+    {
+        $result = 'false';
+        foreach ($array as $value) {
+            if (isset($this->rawData[$value])) {
+                $result = $this->rawData[$value];
+                break;
+            }
+        }
+        return $result;
     }
 }

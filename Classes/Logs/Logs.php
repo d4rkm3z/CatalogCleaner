@@ -1,8 +1,15 @@
 <?php
+
 namespace Logs;
 
 class Logs
 {
+
+    static public function write($message = '')
+    {
+        $filePath = self::getLogFilePath();
+        file_put_contents($filePath, self::prepareMessage($message), FILE_APPEND);
+    }
 
     protected function getLogFilePath()
     {
@@ -15,11 +22,5 @@ class Logs
     protected function prepareMessage($message)
     {
         return $message = date('H:i:s') . ": $message\n";
-    }
-
-    static public function write($message = '')
-    {
-        $filePath = self::getLogFilePath();
-        file_put_contents($filePath, self::prepareMessage($message), FILE_APPEND);
     }
 }
