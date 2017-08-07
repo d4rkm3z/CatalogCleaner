@@ -71,6 +71,16 @@ class ProductsXMLReader
         Logs::write("The xml is parsed");
     }
 
+    protected function beforeInsert(&$node, $type = self::NOTHING)
+    {
+        if ($type == self::PRODUCT) {
+            $this->colorsModel->insert($node);
+        } elseif ($type == self::VARIANT) {
+            $result = $this->colorsModel->getColors($node);
+            $node = array_merge($node, $result);
+        }
+    }
+
     static protected function _xmlToArray($xml, $attributes = false)
     {
         $result = [];
@@ -94,15 +104,5 @@ class ProductsXMLReader
         }
 
         return $result;
-    }
-
-    protected function beforeInsert(&$node, $type = self::NOTHING)
-    {
-        if ($type == self::PRODUCT) {
-            $this->colorsModel->insert($node);
-        } elseif ($type == self::VARIANT) {
-            $result = $this->colorsModel->getColors($node);
-            $node = array_merge($node, $result);
-        }
     }
 }

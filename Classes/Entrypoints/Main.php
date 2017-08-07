@@ -2,6 +2,7 @@
 
 namespace Entrypoints;
 
+use Database\Connector;
 use Factory;
 
 class Main
@@ -45,6 +46,4 @@ class Main
         $this->mainClass = Factory::getClass($this->arguments['action']);
         $this->mainClass->run();
     }
-
-
 }

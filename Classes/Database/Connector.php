@@ -10,16 +10,16 @@ namespace Database;
 
 use PDO;
 use PDOException;
-use Singleton;
 use Traits\LoaderConfiguration;
 
-class Connector extends Singleton
+class Connector
 {
     use LoaderConfiguration;
 
     public $dbh;
     protected $configFile = 'db';
     protected $config;
+
 
     public function __construct()
     {
@@ -39,4 +39,10 @@ class Connector extends Singleton
             echo 'Подключение не удалось: ' . $e->getMessage();
         }
     }
+
+    public function getConnection(): PDO
+    {
+        return $this->dbh;
+    }
 }
+

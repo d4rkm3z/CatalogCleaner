@@ -11,12 +11,13 @@ namespace Models;
 use DOMDocument;
 use Traits\LoaderConfiguration;
 
-class ColorsLoader
+class ColorsParser
 {
     use LoaderConfiguration;
 
     protected $configFile = 'parser.color';
-    protected $config, $html;
+    protected $config;
+    protected $xpath;
 
     public function __construct()
     {
@@ -25,8 +26,18 @@ class ColorsLoader
 
     public function run()
     {
-        $this->loadSiteByName('cream');
-        $this->findNeededColor();
+        $this->parseListColor();
+    }
+
+    protected function parseListColor()
+    {
+        $colorsList = ['cream', 'olive-green'];
+
+        foreach ($colorsList as $color) {
+            print("$color: ");
+            $this->loadSiteByName($color);
+            print($this->getNodeByClass() . "<br>");
+        }
     }
 
     protected function loadSiteByName($color)
@@ -45,19 +56,24 @@ class ColorsLoader
 
         $dom = new DOMDocument();
         $dom->loadHTML($curlresponse);
-
-        foreach ($dom->find('a') as $element) {
-            echo "<pre>";
-            print_r($element->href);
-            echo "</pre>";
-        }
+        $this->xpath = new \DOMXPath($dom);
 
         unset($curlresponse);
         unset($dom);
     }
 
-    protected function findNeededColor()
+    protected function getNodeByClass()
     {
+        $nodeValue = '';
 
+        $className = 'color-img-box';
+        $results = $this->xpath->query("//*[@class='" . $className . "']");
+
+        if ($results->length > 0) {
+            $nodeValue = $results->item(0)->nodeValue;
+        }
+
+        unset($this->xpath);
+        return $nodeValue;
     }
 }
