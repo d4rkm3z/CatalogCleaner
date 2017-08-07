@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: sadovnikov
- * Date: 20.07.17
- * Time: 15:50
- */
 
 namespace Database;
 
@@ -45,4 +39,3 @@ class Connector
         return $this->dbh;
     }
 }
-

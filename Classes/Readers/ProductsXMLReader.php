@@ -76,7 +76,7 @@ class ProductsXMLReader
         if ($type == self::PRODUCT) {
             $this->colorsModel->insert($node);
         } elseif ($type == self::VARIANT) {
-            $result = $this->colorsModel->getColors($node);
+            $result = $this->colorsModel->getDb($node);
             $node = array_merge($node, $result);
         }
     }

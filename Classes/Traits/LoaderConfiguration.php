@@ -11,7 +11,7 @@ namespace Traits;
 
 trait LoaderConfiguration
 {
-    public function loadConfig($configFile)
+    public function loadConfig($configFile) : array
     {
         $basePath = 'Configurations/';
         return yaml_parse_file($basePath . "$configFile.yaml");

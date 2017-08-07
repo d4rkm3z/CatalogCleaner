@@ -4,11 +4,12 @@ namespace Logs;
 
 class Logs
 {
-
     static public function write($message = '')
     {
         $filePath = self::getLogFilePath();
-        file_put_contents($filePath, self::prepareMessage($message), FILE_APPEND);
+        $message = self::prepareMessage($message);
+        print($message);
+        file_put_contents($filePath, $message, FILE_APPEND);
     }
 
     protected function getLogFilePath()

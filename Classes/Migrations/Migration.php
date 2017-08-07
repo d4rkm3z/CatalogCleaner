@@ -18,7 +18,7 @@ class Migration
 
     public function __construct()
     {
-        $this->db = (Connector::getInstance())->dbh;
+        $this->db = (new Connector())->getConnection();
     }
 
     public function run()

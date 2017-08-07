@@ -1,9 +1,7 @@
 <?php
 
-namespace Entrypoints;
-
-use Database\Connector;
-use Factory;
+use \Logs\Logs;
+use \Exception;
 
 class Main
 {
@@ -22,7 +20,7 @@ class Main
             $this->setFromGet();
     }
 
-    protected function isCommandLineInterface()
+    protected function isCommandLineInterface(): bool
     {
         return (php_sapi_name() === 'cli');
     }
@@ -43,7 +41,11 @@ class Main
 
     public function main(): void
     {
-        $this->mainClass = Factory::getClass($this->arguments['action']);
-        $this->mainClass->run();
+        try {
+            $this->mainClass = Router::getClass($this->arguments['action']);
+            $this->mainClass->run();
+        } catch(Exception $exception){
+            Logs::write($exception->getMessage());
+        }
     }
 }

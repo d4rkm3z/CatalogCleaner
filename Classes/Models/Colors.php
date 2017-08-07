@@ -1,41 +1,23 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: sadovnikov
- * Date: 19.07.17
- * Time: 16:26
- */
 
 namespace Models;
 
-use Writers\Storage;
-
-class Colors
+class Colors extends Model
 {
-    private $colors;
+    protected $table = 'colors';
 
-    public function __construct()
+    public function insert(array $data): void
     {
-        $this->colors = new Storage('colors');
-    }
-
-    public function insert($writerData)
-    {
-        $this->colors->append([
-            'product_key' => $writerData['product_key'],
-            'name' => $writerData['color'],
-            'color_id' => $writerData['color_id'],
+        $this->db->append([
+            'product_key' => $data['product_key'],
+            'name' => $data['color'],
+            'color_id' => $data['color_id'],
         ]);
     }
 
-    public function getColors($node)
+    public function loadDistinctColorNames()
     {
-        return $this->colors->getByKey($node['product_key']);
-    }
-
-    public function __destruct()
-    {
-        $this->colors->save();
-        echo('done');
+        return $this->db->fetchAllByColumn(['name'],
+            " WHERE name NOT REGEXP '^[0-9]' GROUP BY name ");
     }
 }
