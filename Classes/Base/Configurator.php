@@ -2,12 +2,9 @@
 
 namespace Base;
 
-use Traits\LoaderConfiguration;
 
 class Configurator
 {
-    use LoaderConfiguration;
-
     protected $configFile;
     protected $config;
 
@@ -17,7 +14,14 @@ class Configurator
         $this->config = $this->loadConfig($this->configFile);
     }
 
-    public function getConfig(){
+    public function getConfig()
+    {
         return $this->config;
+    }
+
+    protected function loadConfig($configFile): array
+    {
+        $basePath = 'Configurations/';
+        return yaml_parse_file($basePath . "$configFile.yaml");
     }
 }

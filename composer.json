@@ -17,5 +17,8 @@
   "require": {
     "d4rkm3z/bash-color-cli": "dev-master",
     "paquettg/php-html-parser": "dev-master"
+  },
+  "require-dev": {
+    "codeception/codeception": "dev-master"
   }
 }

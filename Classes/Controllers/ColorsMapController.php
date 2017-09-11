@@ -7,7 +7,7 @@ use Helpers\Parsers\Colors\ColorJsonParser;
 use Logs\Logs;
 use Models\ColorsMap;
 
-class ColorsMapController
+class ColorsMapController extends AbstractController
 {
     protected $colorNames = [];
     protected $model;
@@ -18,15 +18,15 @@ class ColorsMapController
         $this->model = new ColorsMap();
     }
 
-    public function setJsonParser(){
+    protected function setJsonParser(){
         $this->parser = new ColorJsonParser();
     }
 
-    public function setPageParser(){
+    protected function setPageParser(){
         $this->parser = new ColorPageParser();
     }
 
-    public function run()
+    protected function startAction()
     {
         $this->model->setColors();
         $this->setJsonParser();
@@ -37,7 +37,10 @@ class ColorsMapController
         $this->setPageParser();
         $this->model->findColorsHex($this->parser);
         /* Hey! Stop your comment here! */
+    }
 
+    protected function afterAction()
+    {
         Logs::write("Hex is loaded");
     }
 }

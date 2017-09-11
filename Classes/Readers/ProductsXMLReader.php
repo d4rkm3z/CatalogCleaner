@@ -7,6 +7,7 @@ use Logs\Logs;
 use Models\Colors;
 use Reformers\Reformer;
 use Writers\XMLWriter;
+use XMLReader;
 
 class ProductsXMLReader
 {
@@ -14,8 +15,10 @@ class ProductsXMLReader
     const PRODUCT = 1;
     const VARIANT = 2;
 
+    public $type;
+
     protected $configFile = 'reformer.cleaner';
-    protected $reformer, $xml, $writer, $colorsModel, $config;
+    protected $reformer, $xml, $writer, $colorsModel, $config, $parseVariants;
 
     function __construct()
     {
@@ -24,13 +27,39 @@ class ProductsXMLReader
         $this->xml = new \XMLReader();
         $this->reformer = new Reformer();
         $this->colorsModel = new Colors();
-        $this->writer = new XMLWriter($this->config["path"]["result"]);
-        $this->xml->open($this->config["path"]["source"]);
+        $this->parseVariants = true;
     }
 
-    public function run()
+    public function openXML(string $filename)
     {
-        self::parseXML();
+        $this->xml->open($this->config["path"]["from"] . $filename);
+        $this->writer = new XMLWriter($this->config["path"]["to"] . $filename);
+    }
+
+    protected function parseXmlCase($nodeName)
+    {
+        $node = static::_xmlToArray($this->xml->readInnerXML());
+        if (count($node) == 0) return false;
+
+        $node = $this->reformer->reformat($node);
+        //self::beforeInsert($node);
+        $this->writer->insertNode($node, $nodeName);
+
+        return true;
+    }
+
+    protected function getNodeName()
+    {
+        return strtolower($this->xml->name);
+    }
+
+    protected function identifyNodeType()
+    {
+        $isProductStart = $this->xml->nodeType == XMLReader::ELEMENT && $this->getNodeName() == 'product';
+        $isVariantStart = $this->parseVariants && !$isProductStart && $this->xml->nodeType == \XMLReader::ELEMENT && $this->getNodeName() == 'variant';
+
+        if ($isProductStart) $this->type = self::PRODUCT;
+        if ($isVariantStart) $this->type = self::VARIANT;
     }
 
     /**
@@ -39,41 +68,30 @@ class ProductsXMLReader
      * @param $pathToXML
      * @return array
      */
-    protected function parseXML()
+    public function parseXML()
     {
-        $xml = $this->xml;
-        $parseVariants = true;
+        while ($this->xml->read()) {
+            $this->type = self::NOTHING;
+            $nodeName = strtolower($this->xml->name);
 
-        while ($xml->read()) {
-            $nodeName = strtolower($xml->name);
+            $this->checkNodeType();
 
-            $isProductStart = $xml->nodeType == \XMLReader::ELEMENT && $nodeName == 'product';
-            $isVariantStart = $parseVariants && !$isProductStart && $xml->nodeType == \XMLReader::ELEMENT && $nodeName == 'variant';
-
-            if ($isProductStart) $type = self::PRODUCT;
-            if ($isVariantStart) $type = self::VARIANT;
-
-            if ($isProductStart || $isVariantStart) {
-                $node = static::_xmlToArray($xml->readInnerXML());
-                if (count($node) == 0) continue;
-
-                $node = $this->reformer->reformat($node);
-                self::beforeInsert($node, $type);
-                $this->writer->insertNode($node, $nodeName);
-                $xml->next();
+            if ($this->type == self::PRODUCT || $this->type == self::VARIANT) {
+                if ($this->parseXmlCase($nodeName)) $this->xml->next();
+                else continue;
             }
         }
 
-        $xml->close();
+        $this->xml->close();
         unset($this->writer);
         Logs::write("The xml is parsed");
     }
 
-    protected function beforeInsert(&$node, $type = self::NOTHING)
+    protected function beforeInsert(&$node)
     {
-        if ($type == self::PRODUCT) {
+        if ($this->type == self::PRODUCT) {
             $this->colorsModel->insert($node);
-        } elseif ($type == self::VARIANT) {
+        } elseif ($this->type == self::VARIANT) {
             $result = $this->colorsModel->getDb($node);
             $node = array_merge($node, $result);
         }

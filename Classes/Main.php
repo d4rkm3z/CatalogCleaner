@@ -2,10 +2,10 @@
 
 use \Logs\Logs;
 use \Exception;
+use \Controllers\IController;
 
 class Main
 {
-    protected $mainClass;
     protected $arguments;
 
     public function __construct($argv)
@@ -39,11 +39,14 @@ class Main
         ];
     }
 
+    public function runController(IController $controller){
+        $controller->main();
+    }
+
     public function main(): void
     {
         try {
-            $this->mainClass = Router::getClass($this->arguments['action']);
-            $this->mainClass->run();
+            $this->runController(Router::getClass($this->arguments['action']));
         } catch(Exception $exception){
             Logs::write($exception->getMessage());
         }
