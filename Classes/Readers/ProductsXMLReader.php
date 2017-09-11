@@ -2,16 +2,14 @@
 
 namespace Readers;
 
+use Base\Configurator;
 use Logs\Logs;
 use Models\Colors;
 use Reformers\Reformer;
-use Traits\LoaderConfiguration;
 use Writers\XMLWriter;
 
 class ProductsXMLReader
 {
-    use LoaderConfiguration;
-
     const NOTHING = 0;
     const PRODUCT = 1;
     const VARIANT = 2;
@@ -21,7 +19,7 @@ class ProductsXMLReader
 
     function __construct()
     {
-        $this->config = $this->loadConfig($this->configFile);
+        $this->config = (new Configurator($this->configFile))->getConfig();
 
         $this->xml = new \XMLReader();
         $this->reformer = new Reformer();

@@ -2,13 +2,11 @@
 
 namespace Models;
 
+use Base\Configurator;
 use Helpers\Net\NetConnector;
-use Traits\LoaderConfiguration;
 
 class ColorPages extends Model
 {
-    use LoaderConfiguration;
-
     protected $table = 'colors_pages';
     protected $configFile = 'parser.color';
     protected $config;
@@ -17,7 +15,7 @@ class ColorPages extends Model
 
     public function __construct()
     {
-        $this->config = $this->loadConfig($this->configFile);
+        $this->config = (new Configurator($this->configFile))->getConfig();
         parent::__construct();
     }
 

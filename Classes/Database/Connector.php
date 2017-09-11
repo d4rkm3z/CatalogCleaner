@@ -2,13 +2,12 @@
 
 namespace Database;
 
+use Base\Configurator;
 use PDO;
 use PDOException;
-use Traits\LoaderConfiguration;
 
 class Connector
 {
-    use LoaderConfiguration;
 
     public $dbh;
     protected $configFile = 'db';
@@ -17,7 +16,7 @@ class Connector
 
     public function __construct()
     {
-        $this->config = $this->loadConfig($this->configFile);
+        $this->config = (new Configurator($this->configFile))->getConfig();
         $this->createConnection();
     }
 

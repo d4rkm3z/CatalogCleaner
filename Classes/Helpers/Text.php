@@ -4,7 +4,7 @@ namespace Helpers;
 
 class Text
 {
-    public static function format($text): string
+    public static function formatForConsole($text): string
     {
         return str_replace('
 ', '<br>', $text);

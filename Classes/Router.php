@@ -6,7 +6,7 @@ class Router
 {
     protected static function help(array $options): void
     {
-        print(Text::format("Wrong action!<br>Available options: <br>"));
+        print(Text::formatForConsole("Wrong action!<br>Available options: <br>"));
         array_walk(array_keys($options), function ($val) {
             print ("- $val<br>");
         });
@@ -17,7 +17,8 @@ class Router
         $options = [
             'migration' => 'Migrations\Migration',
             'colors-map' => 'Controllers\ColorsMapController',
-            'parse-xml' => 'Readers\ProductsXMLReader'
+            'parse-xml' => 'Readers\ProductsXMLReader',
+            'localize' => 'Controllers\LocalizerController'
         ];
 
         if (isset($options[$type])) {
