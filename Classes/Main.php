@@ -1,28 +1,25 @@
 <?php
 
-use \Logs\Logs;
-use \Exception;
-use \Controllers\IController;
+use Controllers\IController;
+use Logs\Logs;
+use \Helpers\EnvironmentValidator;
 
 class Main
 {
     protected $arguments;
+    protected $isCLI = false;
 
     public function __construct($argv)
     {
         $this->initArguments($argv);
+        $this->isCLI = EnvironmentValidator::isCommandLineInterface();
     }
 
     protected function initArguments($argv)
     {
-        $this->arguments = $this->isCommandLineInterface() ?
+        $this->arguments = $this->isCLI ?
             $this->setFromArgv($argv) :
             $this->setFromGet();
-    }
-
-    protected function isCommandLineInterface(): bool
-    {
-        return (php_sapi_name() === 'cli');
     }
 
     protected function setFromArgv($argv): array
@@ -39,7 +36,8 @@ class Main
         ];
     }
 
-    public function runController(IController $controller){
+    public function runController(IController $controller)
+    {
         $controller->main();
     }
 
@@ -47,7 +45,7 @@ class Main
     {
         try {
             $this->runController(Router::getClass($this->arguments['action']));
-        } catch(Exception $exception){
+        } catch (Exception $exception) {
             Logs::write($exception->getMessage());
         }
     }

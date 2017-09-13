@@ -24,7 +24,7 @@ class ProductsXMLReader
     {
         $this->config = (new Configurator($this->configFile))->getConfig();
 
-        $this->xml = new \XMLReader();
+        $this->xml = new XMLReader();
         $this->reformer = new Reformer();
         $this->colorsModel = new Colors();
         $this->parseVariants = true;
@@ -38,7 +38,7 @@ class ProductsXMLReader
 
     protected function parseXmlCase($nodeName)
     {
-        $node = static::_xmlToArray($this->xml->readInnerXML());
+        $node = static::xmlToArray($this->xml->readInnerXML());
         if (count($node) == 0) return false;
 
         $node = $this->reformer->reformat($node);
@@ -70,15 +70,18 @@ class ProductsXMLReader
      */
     public function parseXML()
     {
-        while ($this->xml->read()) {
+        $i = 0;
+        while ($i<200 && $this->xml->read()) {
             $this->type = self::NOTHING;
             $nodeName = strtolower($this->xml->name);
 
-            $this->checkNodeType();
+            $this->identifyNodeType();
 
             if ($this->type == self::PRODUCT || $this->type == self::VARIANT) {
                 if ($this->parseXmlCase($nodeName)) $this->xml->next();
                 else continue;
+
+                $i++;
             }
         }
 
@@ -97,7 +100,7 @@ class ProductsXMLReader
         }
     }
 
-    static protected function _xmlToArray($xml, $attributes = false)
+    static protected function xmlToArray($xml, $attributes = false)
     {
         $result = [];
 

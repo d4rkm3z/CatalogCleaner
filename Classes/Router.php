@@ -1,14 +1,16 @@
 <?php
 
 use Helpers\Text;
+use Logs\Logs;
 
 class Router
 {
     protected static function help(array $options): void
     {
-        print(Text::formatForConsole("Wrong action!<br>Available options: <br>"));
-        array_walk(array_keys($options), function ($val) {
-            print ("- $val<br>");
+        Logs::write(Text::reformatForCLI("Wrong action!<br>Available options: ", Text::ERROR));
+        $optionsKeys = array_keys($options);
+        array_walk($optionsKeys, function ($val) {
+            print(Text::reformatForCLI("- $val<br>"));
         });
     }
 

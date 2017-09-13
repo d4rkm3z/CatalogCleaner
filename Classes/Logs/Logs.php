@@ -2,17 +2,21 @@
 
 namespace Logs;
 
+use Helpers\Text;
+use \Helpers\EnvironmentValidator;
+
 class Logs
 {
     static public function write($message = '')
     {
         $filePath = self::getLogFilePath();
         $message = self::prepareMessage($message);
+
         print($message);
         file_put_contents($filePath, $message, FILE_APPEND);
     }
 
-    protected function getLogFilePath()
+    static protected function getLogFilePath()
     {
         $folderPath = 'Logs/';
         $fileName = date('d-m-Y') . '.log';
@@ -20,8 +24,11 @@ class Logs
         return $folderPath . $fileName;
     }
 
-    protected function prepareMessage($message)
+    static protected function prepareMessage($message)
     {
-        return $message = date('H:i:s') . ": $message\n";
+        $message = date('H:i:s') . ": $message\n";
+        if (EnvironmentValidator::isCommandLineInterface()) $message = Text::reformatForCLI($message);
+
+        return $message;
     }
 }
