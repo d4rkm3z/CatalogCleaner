@@ -1,15 +1,20 @@
 <?php
 
-namespace Reformers;
+namespace XmlComponents;
 
 use Logs\Logs;
 
-class Reformer
+class Reformer implements IXmlComponent
 {
     protected $reformattedData;
     protected $rawData;
     protected $dataMap;
     protected $counter;
+
+    public function run($node)
+    {
+        $this->reformat($node);
+    }
 
     public function reformat($rawData)
     {
@@ -31,7 +36,7 @@ class Reformer
 
     protected function validateProduct()
     {
-        return $this->rawData['_type'] == 'product';
+        return isset($this->rawData['_type']) && $this->rawData['_type'] == 'product';
     }
 
     /**

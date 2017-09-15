@@ -14,14 +14,14 @@ class Configurator
         $this->config = $this->loadConfig($this->configFile);
     }
 
-    public function getConfig()
+    public function getConfig(string $className = "") : array
     {
-        return $this->config;
+        return $this->config[$className] ?? [];
     }
 
     protected function loadConfig($configFile): array
     {
         $basePath = 'Configurations/';
-        return yaml_parse_file($basePath . "$configFile.yaml");
+        return \yaml_parse_file("$basePath$configFile.yaml");
     }
 }

@@ -7,7 +7,8 @@ class Router
 {
     protected static function help(array $options): void
     {
-        Logs::write(Text::reformatForCLI("Wrong action!<br>Available options: ", Text::ERROR));
+        Logs::write(Text::reformatForCLI("Wrong action!", Text::ERROR)
+            . Text::reformatForCLI("<br>Available options: "));
         $optionsKeys = array_keys($options);
         array_walk($optionsKeys, function ($val) {
             print(Text::reformatForCLI("- $val<br>"));

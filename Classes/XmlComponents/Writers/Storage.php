@@ -1,6 +1,6 @@
 <?php
 
-namespace Writers;
+namespace XmlComponents\Writers;
 
 use Database\Connector;
 use PDOException;
@@ -25,10 +25,33 @@ class Storage
         $this->table = $table;
     }
 
+    /**
+     * Insert data from $elements to table of model by key => value
+     *
+     * @param $elements array
+     */
+    public function append(array $elements)
+    {
+        $this->elements = $elements;
+        $this->validate();
+        $this->prepareInsertQuery();
+        $this->bindParams();
+        $this->stmt->execute();
+    }
+
     protected function validate()
     {
         if (!(is_array($this->elements) && count($this->elements)))
             throw new PDOException("elements is empty!");
+    }
+
+    /**
+     * Prepare PDO insert query
+     */
+    protected function prepareInsertQuery()
+    {
+        $query = "INSERT INTO {$this->table} ({$this->getKeys()}) VALUES ({$this->getKeys(':')})";
+        $this->stmt = $this->db->prepare($query);
     }
 
     /**
@@ -56,13 +79,13 @@ class Storage
         }
     }
 
-    /**
-     * Prepare PDO insert query
-     */
-    protected function prepareInsertQuery()
+    public function updateMultiple(array $elements, string $where = "")
     {
-        $query = "INSERT INTO {$this->table} ({$this->getKeys()}) VALUES ({$this->getKeys(':')})";
-        $this->stmt = $this->db->prepare($query);
+        $this->elements = $elements;
+        $this->where = $where;
+        $this->validate();
+        $this->prepareUpdateQuery(true);
+        $this->stmt->execute();
     }
 
     protected function prepareUpdateQuery(bool $case = false)
@@ -74,29 +97,6 @@ class Storage
         $query .= $this->where;
 
         $this->stmt = $this->db->prepare($query);
-    }
-
-    /**
-     * Insert data from $elements to table of model by key => value
-     *
-     * @param $elements array
-     */
-    public function append(array $elements)
-    {
-        $this->elements = $elements;
-        $this->validate();
-        $this->prepareInsertQuery();
-        $this->bindParams();
-        $this->stmt->execute();
-    }
-
-    public function updateMultiple(array $elements, string $where = "")
-    {
-        $this->elements = $elements;
-        $this->where = $where;
-        $this->validate();
-        $this->prepareUpdateQuery(true);
-        $this->stmt->execute();
     }
 
     public function update(array $elements, string $where = "")
@@ -116,7 +116,8 @@ class Storage
         return $this->stmt->fetchAll(7, $column);
     }
 
-    public function fetch(string $element, string $where = ""){
+    public function fetch(string $element, string $where = "")
+    {
         $query = "SELECT $element FROM {$this->table} $where";
         $this->stmt = $this->db->prepare($query);
         $this->stmt->execute();

@@ -1,29 +1,32 @@
 <?php
 
-namespace Writers;
+namespace Models\XML;
 
 use Logs\Logs;
 
-class XMLWriter extends XMLBase
+class Writer extends XmlModel
 {
     protected $filePath;
     protected $xmlWriter;
 
-    public function __construct($resultFilePath)
+    protected function validateResultFile($remove = true)
     {
-        $this->filePath = $resultFilePath;
-        $this->validateResultFile();
-        $this->initWriter();
-
-        $this->xmlHeader();
+        if (file_exists($this->filePath) && $remove) {
+            unlink($this->filePath);
+        } elseif (!file_exists($this->filePath) && !$remove) {
+            exit("- Error: Storage file is not created<br>");
+        }
     }
 
-    protected function initWriter()
+    public function init()
     {
         $this->xmlWriter = new \XMLWriter();
+        $this->filePath = $this->config['file'];
+        $this->validateResultFile();
         $this->xmlWriter->openMemory();
         $this->xmlWriter->setIndent(true);
         $this->xmlWriter->startDocument('1.0', 'UTF-8');
+        $this->xmlHeader();
     }
 
     protected function xmlHeader()
@@ -64,10 +67,8 @@ class XMLWriter extends XMLBase
 
     public function insertNode($cell, $nodeName)
     {
-
         if (count($cell) == 0) return;
         $this->xmlWriter->startElement($nodeName);
-        $this->xmlWriter->startElement();
         foreach ($cell as $key => $value) {
             $this->xmlWriter->writeElement($key, trim($value));
         }

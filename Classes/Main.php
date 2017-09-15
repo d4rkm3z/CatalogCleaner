@@ -11,8 +11,8 @@ class Main
 
     public function __construct($argv)
     {
-        $this->initArguments($argv);
         $this->isCLI = EnvironmentValidator::isCommandLineInterface();
+        $this->initArguments($argv);
     }
 
     protected function initArguments($argv)

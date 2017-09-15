@@ -1,0 +1,7 @@
+Reader:
+  folder: 'Data/'
+  file: 'products.xml'
+  parseVariants: true
+Writer:
+  folder: 'Results/'
+  file: 'products.xml'

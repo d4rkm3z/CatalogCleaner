@@ -1,15 +1,11 @@
 <?php
 
-namespace Readers;
+namespace Models\XML;
 
-use Base\Configurator;
 use Logs\Logs;
-use Models\Colors;
-use Reformers\Reformer;
-use Writers\XMLWriter;
 use XMLReader;
 
-class ProductsXMLReader
+class Reader extends XmlModel
 {
     const NOTHING = 0;
     const PRODUCT = 1;
@@ -17,46 +13,56 @@ class ProductsXMLReader
 
     public $type;
 
-    protected $configFile = 'reformer.cleaner';
-    protected $reformer, $xml, $writer, $colorsModel, $config, $parseVariants;
+    protected $reformer, $xmlReader, $colorsModel, $parseVariants, $xmlTranformer;
 
-    function __construct()
+    function init()
     {
-        $this->config = (new Configurator($this->configFile))->getConfig();
-
-        $this->xml = new XMLReader();
-        $this->reformer = new Reformer();
-        $this->colorsModel = new Colors();
-        $this->parseVariants = true;
+        $this->parseVariants = $this->config['parseVariants'];
     }
 
-    public function openXML(string $filename)
+    public function setXmlTransformer(IXmlComponent $xmlTransformer)
     {
-        $this->xml->open($this->config["path"]["from"] . $filename);
-        $this->writer = new XMLWriter($this->config["path"]["to"] . $filename);
+        $this->xmlTranformer = $xmlTransformer;
+    }
+
+    public function openXML()
+    {
+        $this->initReader();
+    }
+
+    protected function initReader()
+    {
+        $this->xmlReader = new XMLReader();
+        $this->xmlReader->open($this->filePath);
+    }
+
+    protected function runXmlOperations($node)
+    {
+        $this->xmlTranformer->run($node);
+        $nodes = $this->xmlTranformer->getNodesStorage();
     }
 
     protected function parseXmlCase($nodeName)
     {
-        $node = static::xmlToArray($this->xml->readInnerXML());
+        $node = static::xmlToArray($this->xmlReader->readInnerXML());
         if (count($node) == 0) return false;
 
-        $node = $this->reformer->reformat($node);
+        $this->runXmlOperations($node);
         //self::beforeInsert($node);
-        $this->writer->insertNode($node, $nodeName);
+        //$this->writer->insertNode($node, $nodeName);
 
         return true;
     }
 
     protected function getNodeName()
     {
-        return strtolower($this->xml->name);
+        return strtolower($this->xmlReader->name);
     }
 
     protected function identifyNodeType()
     {
-        $isProductStart = $this->xml->nodeType == XMLReader::ELEMENT && $this->getNodeName() == 'product';
-        $isVariantStart = $this->parseVariants && !$isProductStart && $this->xml->nodeType == \XMLReader::ELEMENT && $this->getNodeName() == 'variant';
+        $isProductStart = $this->xmlReader->nodeType == XMLReader::ELEMENT && $this->getNodeName() == 'product';
+        $isVariantStart = $this->parseVariants && !$isProductStart && $this->xmlReader->nodeType == \XMLReader::ELEMENT && $this->getNodeName() == 'variant';
 
         if ($isProductStart) $this->type = self::PRODUCT;
         if ($isVariantStart) $this->type = self::VARIANT;
@@ -70,22 +76,19 @@ class ProductsXMLReader
      */
     public function parseXML()
     {
-        $i = 0;
-        while ($i<200 && $this->xml->read()) {
+        while ($this->xmlReader->read()) {
             $this->type = self::NOTHING;
-            $nodeName = strtolower($this->xml->name);
+            $nodeName = strtolower($this->xmlReader->name);
 
             $this->identifyNodeType();
 
             if ($this->type == self::PRODUCT || $this->type == self::VARIANT) {
-                if ($this->parseXmlCase($nodeName)) $this->xml->next();
+                if ($this->parseXmlCase($nodeName)) $this->xmlReader->next();
                 else continue;
-
-                $i++;
             }
         }
 
-        $this->xml->close();
+        $this->xmlReader->close();
         unset($this->writer);
         Logs::write("The xml is parsed");
     }
